@@ -19,6 +19,12 @@ class ChildComponent extends React.Component {
     this.state = {
       name: "Denis"
     };
+
+    this.oops = this.oops.bind(this);
+  }
+
+  oops() {
+    this.setState(() => ({ oops: true }));
   }
 
   UNSAFE_componentWillMount() {
@@ -31,26 +37,26 @@ class ChildComponent extends React.Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     console.log("ChildComponent: UNSAFE_componentWillReceiveProps()");
-    console.log("nextProps: " + nextProps);
+    console.log("nextProps: ", nextProps);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     console.log("ChildComponent: shouldComponentUpdate()");
-    console.log("nextProps: " + nextProps);
-    console.log("nextState: " + nextState);
+    console.log("nextProps: ", nextProps);
+    console.log("nextState: ", nextState);
     return true;
   }
 
   UNSAFE_componentWillUpdate(nextProps, nextState) {
     console.log("ChildComponent: UNSAFE_componentWillUpdate()");
-    console.log("nextProps: " + nextProps);
-    console.log("nextState: " + nextState);
+    console.log("nextProps: ", nextProps);
+    console.log("nextState: ", nextState);
   }
 
   componentDidUpdate(prevProps, prevState) {
     console.log("ChildComponent: componentDidUpdate()");
-    console.log("nextProps: " + prevProps);
-    console.log("nextState: " + prevState);
+    console.log("prevProps: ", prevProps);
+    console.log("prevState: ", prevState);
   }
 
   componentWillUnmount() {
@@ -59,7 +65,15 @@ class ChildComponent extends React.Component {
 
   render() {
     console.log("ChildComponent: render()");
-    return <div className="ChildComponent">Name: {this.props.name}</div>;
+    if (this.state.oops) {
+      throw new Error("Something went wrong");
+    }
+    return (
+      <div className="ChildComponent">
+        <div>Name: {this.props.name}</div>
+        <button onClick={this.oops}>Create error</button>
+      </div>
+    );
   }
 }
 
@@ -102,34 +116,50 @@ class ParentComponent extends React.Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     console.log("ParentComponent: UNSAFE_componentWillReceiveProps()");
-    console.log("nextProps: " + nextProps);
+    console.log("nextProps: ", nextProps);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     console.log("ParentComponent: shouldComponentUpdate()");
-    console.log("nextProps: " + nextProps);
-    console.log("nextState: " + nextState);
+    console.log("nextProps: ", nextProps);
+    console.log("nextState: ", nextState);
     return true;
   }
 
   UNSAFE_componentWillUpdate(nextProps, nextState) {
     console.log("ParentComponent: UNSAFE_componentWillUpdate()");
-    console.log("nextProps: " + nextProps);
-    console.log("nextState: " + nextState);
+    console.log("nextProps: ", nextProps);
+    console.log("nextState: ", nextState);
   }
 
   componentDidUpdate(prevProps, prevState) {
     console.log("ParentComponent: componentDidUpdate()");
-    console.log("nextProps: " + prevProps);
-    console.log("nextState: " + prevState);
+    console.log("prevProps: ", prevProps);
+    console.log("prevState: ", prevState);
   }
 
   componentWillUnmount() {
     console.log("ParentComponent: componentWillUnmount()");
   }
 
+  componentDidCatch(err, errInfo) {
+    console.log("ParentComponent: componentDidCatch()");
+    console.error(err);
+    console.error(errInfo);
+    this.setState(() => ({ err, errInfo }));
+  }
+
   render() {
     console.log("ParentComponent: render()");
+    if (this.state.err) {
+      return (
+        <details style={{ whiteSpace: "pre-wrap" }}>
+          {this.state.err && this.state.err.toString()}
+          <br />
+          {this.state.errInfo.componentStack}
+        </details>
+      );
+    }
     return (
       <div className="ParentComponent">
         <h1>Learn about rendering and lifecycle methods!</h1>
